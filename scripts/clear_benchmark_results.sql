@@ -1,0 +1,1 @@
+TRUNCATE TABLE benchmark_results RESTART IDENTITY;

@@ -1,0 +1,79 @@
+version: "3.9"
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: auction-rabbitmq
+    restart: unless-stopped
+    ports:
+      - "5673:5672"
+      - "15673:15672"
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  postgres:
+    image: postgres:16
+    container_name: auction-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: auction_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./infrastructure/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d auction_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  bid-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bid-api
+    restart: unless-stopped
+    working_dir: /app
+    command: cargo run -p bid-api
+    environment:
+      CARGO_TARGET_DIR: /tmp/bid-api-target
+    env_file:
+      - .env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/app
+
+  bid-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bid-worker
+    restart: unless-stopped
+    working_dir: /app
+    command: cargo run -p bid-worker
+    environment:
+      CARGO_TARGET_DIR: /tmp/bid-worker-target
+    env_file:
+      - .env
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    volumes:
+      - .:/app
+
+volumes:
+  postgres_data:
