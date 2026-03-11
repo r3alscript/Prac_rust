@@ -407,6 +407,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2af50177e190e07a26ab74f8b1efbfe2ef87da2116221318cb1c2e82baf7de06"
 
 [[package]]
+<<<<<<< HEAD
 name = "benchmark-api"
 version = "0.1.0"
 dependencies = [
@@ -427,6 +428,8 @@ name = "benchmark-bashboard"
 version = "0.1.0"
 
 [[package]]
+=======
+>>>>>>> f63628c3a44df1d65bd9e805f0eef628cd04195e
 name = "benchmark-generator"
 version = "0.1.0"
 dependencies = [
@@ -3096,6 +3099,7 @@ dependencies = [
 ]
 
 [[package]]
+<<<<<<< HEAD
 name = "tower-http"
 version = "0.6.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3110,6 +3114,8 @@ dependencies = [
 ]
 
 [[package]]
+=======
+>>>>>>> f63628c3a44df1d65bd9e805f0eef628cd04195e
 name = "tower-layer"
 version = "0.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"

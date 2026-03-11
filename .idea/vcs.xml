@@ -1,3 +1,4 @@
+
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="VcsDirectoryMappings">
@@ -5,4 +6,11 @@
     <mapping directory="$PROJECT_DIR$/benchmark-api" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/benchmark-bashboard" vcs="Git" />
   </component>
+=======
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="$PROJECT_DIR$" vcs="Git" />
+  </component>
+>>>>>>> f63628c3a44df1d65bd9e805f0eef628cd04195e
 </project>

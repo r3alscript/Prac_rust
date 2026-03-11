@@ -1,3 +1,4 @@
+
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ProjectModuleManager">
@@ -5,4 +6,13 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/Prac.iml" filepath="$PROJECT_DIR$/.idea/Prac.iml" />
     </modules>
   </component>
+=======
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/Prac.iml" filepath="$PROJECT_DIR$/.idea/Prac.iml" />
+    </modules>
+  </component>
+>>>>>>> f63628c3a44df1d65bd9e805f0eef628cd04195e
 </project>
