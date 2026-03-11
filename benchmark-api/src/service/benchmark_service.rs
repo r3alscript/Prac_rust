@@ -204,7 +204,8 @@ impl BenchmarkService {
 
     async fn run_generator(&self, format: &str) -> Result<(), AppError> {
         let rabbitmq_url = std::env::var("BENCHMARK_RABBITMQ_URL")
-            .unwrap_or_else(|_| "amqp://guest:guest@auction-rabbitmq:5672/%2f".to_string());
+            .unwrap_or_else(|_| "amqp://guest:guest@localhost:5673/%2f".to_string());
+
 
         let status = Command::new("cargo")
             .args([

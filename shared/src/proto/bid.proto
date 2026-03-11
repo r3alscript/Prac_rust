@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 syntax = "proto3";
 
 package auction;
@@ -13,20 +13,4 @@ message BidPlacedEventProto {
   double amount = 7;
   string currency = 8;
   int64 sent_time_ms = 9;
-=======
-syntax = "proto3";
-
-package auction;
-
-message BidPlacedEventProto {
-  string event_id = 1;
-  string event_type = 2;
-  string occurred_at = 3;
-  string bid_id = 4;
-  string lot_id = 5;
-  string user_id = 6;
-  double amount = 7;
-  string currency = 8;
-  int64 sent_time_ms = 9;
->>>>>>> f63628c3a44df1d65bd9e805f0eef628cd04195e
 }
