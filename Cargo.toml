@@ -1,0 +1,7 @@
+[workspace]
+members = [
+    "shared",
+    "bid-api",
+    "bid-worker"
+, "benchmark-generator", "benchmark-worker",  "benchmark-bashboard", "benchmark-api"]
+resolver = "2"

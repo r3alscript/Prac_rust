@@ -1,0 +1,30 @@
+.mylot-card{
+  position: relative;
+}
+
+.mylot-editBtn{
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+
+  width: 40px;
+  height: 40px;
+
+  border: 2px solid #373737;
+  border-radius: 10px;
+
+  background: #ffffff;
+
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+}
+
+.mylot-editBtn img{
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}

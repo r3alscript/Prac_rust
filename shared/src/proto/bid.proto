@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package auction;
+
+message BidPlacedEventProto {
+  string event_id = 1;
+  string event_type = 2;
+  string occurred_at = 3;
+  string bid_id = 4;
+  string lot_id = 5;
+  string user_id = 6;
+  double amount = 7;
+  string currency = 8;
+  int64 sent_time_ms = 9;
+}
