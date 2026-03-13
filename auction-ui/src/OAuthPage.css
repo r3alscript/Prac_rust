@@ -20,7 +20,6 @@
 
 .oauth-header {
     text-align: center;
-    margin-bottom: 28px;
 }
 
 .oauth-header h1 {
@@ -84,6 +83,10 @@
     background: #2347BE;
     color: #fff;
     border: 1px solid #d7dce5;
+    max-width: 300px;
+    height: 70px;
+    align-items: center;
+    justify-content: center;
 }
 
 .google-btn .oauth-icon {
@@ -91,6 +94,105 @@
     color: #e8e8e8;
 }
 
+.oauth-container {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+}
+
+.oauth-image img {
+    width: 580px;
+    max-width: 40vw;
+
+}a.oauth-page {
+     min-height: 100vh;
+     display: flex;
+     align-items: center;
+     justify-content: center;
+     background: linear-gradient(135deg, #f5f7fb 0%, #e9eef8 100%);
+     padding: 40px;
+     font-family: "Montserrat", sans-serif;
+ }
+
+/* головний контейнер */
+.auth-card {
+    width: 1200px;
+    background: white;
+    border-radius: 28px;
+    padding: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 80px;
+    box-shadow: 0 20px 60px rgba(32, 45, 85, 0.12);
+}
+
+.auth-left {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.auth-right {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+}
+
+.auth-right img {
+    width: 620px;
+}
+
+
+
+.oauth-header h1 {
+    font-size: 40px;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 16px;
+}
+
+.oauth-header p {
+    font-size: 16px;
+    color: #6b7280;
+    line-height: 1.6;
+}
+
+/* кнопка */
+.oauth-btn {
+    border: none;
+    border-radius: 20px;
+    padding: 20px 26px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.oauth-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(0,0,0,0.15);
+}
+
+.google-btn {
+    background: #2f4cc9;
+    color: white;
+}
+
+/* іконка */
+.oauth-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.18);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
 
 .oauth-icon {
