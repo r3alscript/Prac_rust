@@ -1,8 +1,26 @@
 import "./OAuthPage.css";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const API_BASE = "http://localhost:8080";
 
 export default function OAuthPage() {
+
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const token = params.get("token");
+
+        if (token && token.trim() !== "") {
+            console.log("JWT token received:", token);
+
+            localStorage.setItem("access_token", token);
+
+            navigate("/lots", { replace: true });
+        }
+    }, [navigate]);
+
     const handleGoogleLogin = () => {
         window.location.href = `${API_BASE}/auth/google/login`;
     };
@@ -35,4 +53,5 @@ export default function OAuthPage() {
             </div>
 
         </div>
-    );}
+    );
+}

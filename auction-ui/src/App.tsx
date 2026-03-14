@@ -5,6 +5,7 @@ import BidHistory from "./BidHistoryPage";
 import MyLots from "./MyLotsPage";
 import EditProfile from "./EditProfilePage";
 import OAuthP from "./OAuthPage";
+import OAuthem from "./OAuthPageem";
 
 
 function App() {
@@ -18,6 +19,8 @@ function App() {
         <Route path="/profile" element={<EditProfile />} />
         <Route path="*" element={<LotsPage />} />
         <Route path="/authorization" element={<OAuthP />} />
+        <Route path="/oauth/success" element={<OAuthem />} />
+
       </Routes>
     </BrowserRouter>
   );

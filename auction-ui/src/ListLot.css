@@ -476,3 +476,53 @@ button:focus-visible{
 .ll-field-textarea .ll-label{
   top:18px;
 }
+.lots-userMeta{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+}
+
+.lots-userEmail{
+  font-size:13px;
+  color:var(--muted);
+  line-height:1.2;
+  word-break:break-all;
+}
+
+.lots-avatarImage{
+  object-fit:cover;
+  display:block;
+  border:2px solid #e5e7eb;
+}
+
+.lots-avatarFallback{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#fff;
+  font-size:16px;
+  font-weight:700;
+  background:#2347BE;
+}
+
+.lots-balanceRow{
+  display:flex;
+  justify-content:flex-end;
+  margin-bottom:18px;
+}
+
+.lots-balanceCard{
+  background:#fff;
+  border:1px solid #e6ecf4;
+  border-radius:18px;
+  padding:12px 18px;
+  box-shadow:5px 12px 24px rgba(0, 22, 72, 0.05);
+  font-size:18px;
+  color:var(--text);
+}
+
+.lots-balanceValue{
+  font-weight:700;
+  color:var(--primary);
+}
