@@ -1,6 +1,7 @@
 use chrono::{Duration, Utc};
 use jsonwebtoken::{decode, encode, DecodingKey, EncodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 use crate::domain::user::User;
 
@@ -9,6 +10,12 @@ pub struct JwtClaims {
     pub sub: String,
     pub email: String,
     pub exp: usize,
+}
+
+impl JwtClaims {
+    pub fn user_id(&self) -> Result<Uuid, uuid::Error> {
+        Uuid::parse_str(&self.sub)
+    }
 }
 
 pub fn create_jwt(user: &User) -> Result<String, jsonwebtoken::errors::Error> {

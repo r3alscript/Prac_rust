@@ -1,4 +1,3 @@
-use chrono::{DateTime, Utc};
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
@@ -12,5 +11,5 @@ pub struct User {
     pub surname: String,
     pub photo_url: Option<String>,
     pub balance: Decimal,
-    pub created_at_utc: DateTime<Utc>,
+    pub created_at_utc: chrono::NaiveDateTime,
 }

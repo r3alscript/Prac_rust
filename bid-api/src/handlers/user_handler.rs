@@ -4,7 +4,6 @@ use axum::{
     response::{IntoResponse, Response},
     Json,
 };
-use uuid::Uuid;
 
 use crate::{
     auth::jwt::decode_jwt,
@@ -38,7 +37,8 @@ async fn handle_me(
     let claims = decode_jwt(token)
         .map_err(|e| (StatusCode::UNAUTHORIZED, format!("Invalid token: {e}")))?;
 
-    let user_id = Uuid::parse_str(&claims.sub)
+    let user_id = claims
+        .user_id()
         .map_err(|e| (StatusCode::UNAUTHORIZED, format!("Invalid user id in token: {e}")))?;
 
     let repo = UserRepository::new(state.db.clone());

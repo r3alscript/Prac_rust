@@ -18,7 +18,14 @@ impl UserRepository {
     pub async fn find_by_id(&self, user_id: Uuid) -> Result<Option<User>, sqlx::Error> {
         let user = sqlx::query_as::<_, User>(
             r#"
-            SELECT id, email, name, surname, photo_url, balance, created_at_utc
+            SELECT
+                id,
+                email,
+                name,
+                surname,
+                photo_url,
+                balance,
+                created_at_utc
             FROM users
             WHERE id = $1
             "#,
@@ -33,7 +40,14 @@ impl UserRepository {
     pub async fn find_by_email(&self, email: &str) -> Result<Option<User>, sqlx::Error> {
         let user = sqlx::query_as::<_, User>(
             r#"
-            SELECT id, email, name, surname, photo_url, balance, created_at_utc
+            SELECT
+                id,
+                email,
+                name,
+                surname,
+                photo_url,
+                balance,
+                created_at_utc
             FROM users
             WHERE email = $1
             "#,
@@ -59,7 +73,7 @@ impl UserRepository {
             surname: surname.to_string(),
             photo_url: photo_url.map(|s| s.to_string()),
             balance: Decimal::new(0, 0),
-            created_at_utc: Utc::now(),
+            created_at_utc: Utc::now().naive_utc(),
         };
 
         sqlx::query(

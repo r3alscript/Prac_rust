@@ -1,86 +1,123 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import "./LotPage.css";
-import { useNavigate } from "react-router-dom";
-
-
+import { useNavigate, useParams } from "react-router-dom";
 
 function pad2(n: number): string {
   return String(n).padStart(2, "0");
 }
 
 function msToHMS(ms: number): string {
-  const total = Math.max(0, Math.floor(ms / 1000));
+  const safeMs = Number.isFinite(ms) ? ms : 0;
+  const total = Math.max(0, Math.floor(safeMs / 1000));
   const h = Math.floor(total / 3600);
   const m = Math.floor((total % 3600) / 60);
   const s = total % 60;
   return `${pad2(h)}:${pad2(m)}:${pad2(s)}`;
 }
 
-type Lot = {
-  author: string;
-  seller: string;
+function toDateMs(value: string | null | undefined): number {
+  if (!value) return 0;
+  const normalized = value.includes("T") ? value : value.replace(" ", "T");
+  const parsed = new Date(normalized).getTime();
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function formatDateTime(value: string | null | undefined): string {
+  if (!value) return "—";
+  const normalized = value.includes("T") ? value : value.replace(" ", "T");
+  const date = new Date(normalized);
+  if (Number.isNaN(date.getTime())) return value;
+
+  return new Intl.DateTimeFormat("uk-UA", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
+}
+
+type LotDetails = {
+  id: string;
   title: string;
-  bidsCount: number;
-  maxBid: number;
-  watchers: number;
-  createdAt: string;
-  endsAtLabel: string;
-  currentPrice: number;
   description: string;
-  endsInMsFromNow: number;
-  images: string[];
+  start_price: number;
+  current_price: number;
+  seller_id: string;
+  image_url: string | null;
+  auction_end: string;
+  created_at: string;
+  bids_count: number;
+  max_bid: number;
 };
 
-const lots = [
-  { id: 1, title: "Стіл дерев’яний", price: 125, image: "/img/chair.jpg" },
-  { id: 2, title: "Будинок", price: 125, image: "/img/house.png" },
-  { id: 3, title: "Будинок", price: 125, image: "/img/house.png" },
-  { id: 4, title: "Будинок", price: 125, image: "/img/house.png" },
-];
+type LotShort = {
+  id: string;
+  title: string;
+  current_price: number;
+  image_url: string | null;
+};
+
+const API_BASE = "http://localhost:8080";
+
 export default function LotPage() {
-
   const navigate = useNavigate();
+  const { id } = useParams();
 
-  const goToLots = () => {
-    navigate("/lots");
+  const [lot, setLot] = useState<LotDetails | null>(null);
+  const [recommendedLots, setRecommendedLots] = useState<LotShort[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [bidValue, setBidValue] = useState(0);
+  const [placingBid, setPlacingBid] = useState(false);
+  const [endsInMs, setEndsInMs] = useState(0);
+
+  const goToLots = () => navigate("/lots");
+
+  const loadLot = async () => {
+    try {
+      setLoading(true);
+
+      const response = await fetch(`${API_BASE}/api/lots/${id}`);
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || "Не вдалося завантажити лот");
+      }
+
+      const data: LotDetails = await response.json();
+      setLot(data);
+      setBidValue(data.current_price + 5);
+
+      const endMs = toDateMs(data.auction_end) - Date.now();
+      setEndsInMs(Math.max(0, endMs));
+    } catch (error) {
+      console.error("Помилка завантаження лота:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const lot: Lot = useMemo(
-    () => ({
-      author: "RjhbcnefX",
-      seller: "PPvdmo",
-      title: "Стіл дерев’яний",
-      bidsCount: 20,
-      maxBid: 2000,
-      watchers: 12,
-      createdAt: "12.06.2026",
-      endsAtLabel: "12.06.2026, 21:00",
-      currentPrice: 125,
-      description:
-        "Стіл має класичний дизайн, який гармонійно поєднується як із сучасним, так і з традиційним інтер’єром. Конструкція міцна та стійка, ніжки надійно закріплені, що забезпечує довговічність і комфорт у використанні.",
-      endsInMsFromNow: (11 * 3600 + 17 * 60 + 26) * 1000,
-      images: [
-        "https://images.unsplash.com/photo-1616628182505-4c2a5f87b84d?auto=format&fit=crop&w=1400&q=80",
-        "https://images.unsplash.com/photo-1598300056393-4aac492f4344?auto=format&fit=crop&w=1400&q=80",
-        "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1400&q=80",
-      ],
-    }),
-    []
-  );
+  const loadRecommendedLots = async () => {
+    try {
+      const response = await fetch(`${API_BASE}/api/lots`);
+      if (!response.ok) return;
 
-  const [currentPrice, setCurrentPrice] = useState<number>(lot.currentPrice);
-  const [bidValue, setBidValue] = useState<number>(lot.currentPrice);
-  const [endsInMs, setEndsInMs] = useState<number>(lot.endsInMsFromNow);
-  const [activeImg, setActiveImg] = useState<number>(0);
+      const data: LotShort[] = await response.json();
+      setRecommendedLots(data.filter((x) => String(x.id) !== String(id)).slice(0, 4));
+    } catch (error) {
+      console.error("Помилка завантаження рекомендацій:", error);
+    }
+  };
 
-  const nextImg = () => setActiveImg((i) => (i + 1) % lot.images.length);
-  const prevImg = () =>
-    setActiveImg((i) => (i - 1 + lot.images.length) % lot.images.length);
+  useEffect(() => {
+    loadLot();
+    loadRecommendedLots();
+  }, [id]);
 
   useEffect(() => {
     const t = window.setInterval(() => {
       setEndsInMs((prev) => Math.max(0, prev - 1000));
     }, 1000);
+
     return () => window.clearInterval(t);
   }, []);
 
@@ -89,184 +126,171 @@ export default function LotPage() {
   const decBid = () => setBidValue((v) => Math.max(step, v - step));
   const incBid = () => setBidValue((v) => v + step);
 
-  const placeBid = () => {
-    if (bidValue <= currentPrice) {
+  const placeBid = async () => {
+    const token = localStorage.getItem("access_token");
+
+    if (!token) {
+      window.location.href = "/authorization";
+      return;
+    }
+
+    if (!lot) return;
+
+    if (bidValue <= lot.current_price) {
       alert("Ставка має бути більшою за поточну ціну.");
       return;
     }
-    setCurrentPrice(bidValue);
-    alert(`Ставку ${bidValue} грн прийнято!`);
+
+    try {
+      setPlacingBid(true);
+
+      const response = await fetch(`${API_BASE}/api/lots/${lot.id}/bids`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          amount: bidValue,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || "Не вдалося зробити ставку");
+      }
+
+      await loadLot();
+      await loadRecommendedLots();
+    } catch (error) {
+      console.error("Помилка ставки:", error);
+      alert("Не вдалося зробити ставку.");
+    } finally {
+      setPlacingBid(false);
+    }
   };
 
+  if (loading) return <div className="lp-page">Завантаження...</div>;
+  if (!lot) return <div className="lp-page">Лот не знайдено</div>;
+
+  const mainImage = lot.image_url || "/img/no-image.png";
+
   return (
-    <div className="lp-page">
-      <div className="lp-topbar">
-        <div className="lp-user">
-          <div className="lp-avatar" />
-          <div className="lp-username">{lot.author}</div>
-          <button className="lp-logoutBtn" type="button" aria-label="logout" >
-           
-            <img src="/img/Logout.jpg" alt="logout" />
-          </button>
-        </div>
-      </div>
-
-      <div className="lp-container">
-        <div className="lp-layout">
-         <div className="lp-titleRow">
-  <button
-    className="lp-backBtn"
-    aria-label="back"
-    onClick={goToLots}
-  >
-    ←
-  </button>
-  <h1 className="lp-title">{lot.title}</h1>
-</div>
-
-          <div className="lp-chips">
-            <div className="lp-chip">
-              <span className="lp-chip-text">Продавець</span>
-              <span className="lp-chip-num">{lot.seller}</span>
+      <div className="lp-page">
+        <div className="lp-container">
+          <div className="lp-layout">
+            <div className="lp-titleRow">
+              <button className="lp-backBtn" aria-label="back" onClick={goToLots}>
+                ←
+              </button>
+              <h1 className="lp-title">{lot.title}</h1>
             </div>
 
-            <div className="lp-chip">
-              <span className="lp-chip-text">Ставок</span>
-              <span className="lp-chip-num">{lot.bidsCount}</span>
-            </div>
+            <div className="lp-chips">
+              <div className="lp-chip">
+                <span className="lp-chip-text">Продавець</span>
+                <span className="lp-chip-num">{lot.seller_id}</span>
+              </div>
 
-            <div className="lp-chip">
-              <span className="lp-chip-text">Макс. ставка</span>
-              <span className="lp-chip-num">{lot.maxBid}</span>
-            </div>
+              <div className="lp-chip">
+                <span className="lp-chip-text">Ставок</span>
+                <span className="lp-chip-num">{lot.bids_count}</span>
+              </div>
 
-            <div className="lp-chip">
-              <span className="lp-chip-text">Стежать за лотом</span>
-              <span className="lp-chip-num">{lot.watchers}</span>
-            </div>
+              <div className="lp-chip">
+                <span className="lp-chip-text">Макс. ставка</span>
+                <span className="lp-chip-num">{lot.max_bid}</span>
+              </div>
 
-            <div className="lp-chip">
-              <span className="lp-chip-text">Додано</span>
-              <span className="lp-chip-num">{lot.createdAt}</span>
-            </div>
-          </div>
+              <div className="lp-chip">
+                <span className="lp-chip-text">Стежати за лотом</span>
+                <span className="lp-chip-num">—</span>
+              </div>
 
-          <div className="lp-imageCard">
-            <button
-              className="lp-imgArrow lp-left"
-              onClick={prevImg}
-              type="button"
-              aria-label="prev"
-            >
-              <span className="lp-arrowIcon">‹</span>
-            </button>
-
-            <img className="lp-mainImage" src={lot.images[activeImg]} alt="lot" />
-
-            <button
-              className="lp-imgArrow lp-right"
-              onClick={nextImg}
-              type="button"
-              aria-label="next"
-            >
-              <span className="lp-arrowIcon">›</span>
-            </button>
-
-            <div className="lp-thumbs">
-              {lot.images.map((img, i) => (
-                <button
-                  key={img}
-                  className={`lp-thumbBtn ${i === activeImg ? "active" : ""}`}
-                  onClick={() => setActiveImg(i)}
-                  type="button"
-                  aria-label={`thumb-${i + 1}`}
-                >
-                  <img className="lp-thumbImg" src={img} alt={`thumb ${i + 1}`} />
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="lp-right">
-            <div className="lp-card lp-ends">
-              <div className="lp-ends-row">
-                <div>
-                  <div className="lp-muted">Закінчення</div>
-                  <div className="lp-strong">{lot.endsAtLabel}</div>
-                </div>
-
-                <div className="lp-ends-right">
-                  <div className="lp-muted">Закінчується через</div>
-                  <div className="lp-timer">{msToHMS(endsInMs)}</div>
-                </div>
+              <div className="lp-chip">
+                <span className="lp-chip-text">Додано</span>
+                <span className="lp-chip-num">{formatDateTime(lot.created_at)}</span>
               </div>
             </div>
 
-            <div className="lp-card lp-priceCard">
-              <div className="lp-priceRow">
-                <div className="lp-priceLabel">Поточна ціна</div>
-                <div className="lp-priceTag">
-                  <span>{currentPrice}</span>
-                  <span className="lp-currency">грн</span>
-                </div>
-              </div>
+            <div className="lp-imageCard">
+              <img className="lp-mainImage" src={mainImage} alt={lot.title} />
             </div>
 
-            <div className="lp-card lp-bidCard">
-              <div className="lp-bidRow">
-                <div className="lp-stepper">
-                  <button
-                    className="lp-stepBtn"
-                    onClick={decBid}
-                    aria-label="minus"
-                    type="button"
-                  >
-                    –
-                  </button>
+            <div className="lp-right">
+              <div className="lp-card lp-ends">
+                <div className="lp-ends-row">
+                  <div>
+                    <div className="lp-muted">Закінчення</div>
+                    <div className="lp-strong">{formatDateTime(lot.auction_end)}</div>
+                  </div>
 
-                  <div className="lp-stepValue">
-                    {bidValue} <span className="lp-currency">грн</span>
+                  <div className="lp-ends-right">
+                    <div className="lp-muted">Закінчується через</div>
+                    <div className="lp-timer">{msToHMS(endsInMs)}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="lp-card lp-priceCard">
+                <div className="lp-priceRow">
+                  <div className="lp-priceLabel">Поточна ціна</div>
+                  <div className="lp-priceTag">
+                    <span>{lot.current_price}</span>
+                    <span className="lp-currency">грн</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="lp-card lp-bidCard">
+                <div className="lp-bidRow">
+                  <div className="lp-stepper">
+                    <button className="lp-stepBtn" onClick={decBid} type="button">
+                      –
+                    </button>
+
+                    <div className="lp-stepValue">
+                      {bidValue}
+                      <span className="lp-currency"> грн</span>
+                    </div>
+
+                    <button className="lp-stepBtn" onClick={incBid} type="button">
+                      +
+                    </button>
                   </div>
 
                   <button
-                    className="lp-stepBtn"
-                    onClick={incBid}
-                    aria-label="plus"
-                    type="button"
+                      className="lp-primaryBtn"
+                      onClick={placeBid}
+                      type="button"
+                      disabled={placingBid}
                   >
-                    +
+                    {placingBid ? "Обробка..." : "Зробити ставку"}
                   </button>
                 </div>
-
-                <button className="lp-primaryBtn" onClick={placeBid} type="button">
-                  Зробити ставку
-                </button>
               </div>
+
+              <div className="lp-card lp-desc">{lot.description}</div>
             </div>
 
-            <div className="lp-card lp-desc">{lot.description}</div>
+            <aside className="lp-side">
+              <div className="lp-recommend">Можливо вам сподобається</div>
+
+              <div className="lp-sideInner">
+                {recommendedLots.map((x) => (
+                    <a key={x.id} href={`/lot/${x.id}`} className="lp-sideCard">
+                      <div className="lp-sideImageWrap">
+                        <img src={x.image_url || "/img/no-image.png"} alt={x.title} />
+                      </div>
+
+                      <div className="lp-sideTitleText">{x.title}</div>
+                      <div className="lp-priceTag2">{x.current_price} грн</div>
+                    </a>
+                ))}
+              </div>
+            </aside>
           </div>
-
-        
-          <aside className="lp-side">
-            <div className="lp-recommend">Можливо вам сподобається</div>
-
-            <div className="lp-sideInner">
-              {lots.map((x) => (
-                <a key={x.id} href={`/lot/${x.id}`} className="lp-sideCard">
-                  <div className="lp-sideImageWrap">
-                    <img src={x.image} alt={x.title} />
-                  </div>
-
-                  <div className="lp-sideTitleText">{x.title}</div>
-
-                  <div className="lp-priceTag2">{x.price} грн</div>
-                </a>
-              ))}
-            </div>
-          </aside>
         </div>
       </div>
-    </div>
   );
 }
